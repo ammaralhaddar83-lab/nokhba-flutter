@@ -1,0 +1,3 @@
+// Supabase: Project Settings > API
+const SUPABASE_URL = "https://loemftmfrqcupqulgwbp.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvZW1mdG1mcnFjdXBxdWxnd2JwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExOTk0NzIsImV4cCI6MjEwNjc3NTQ3Mn0.HLWUOxO1v9TNxTZkIEC85Hlgc4Xekqgop0S9BNik2Ak";

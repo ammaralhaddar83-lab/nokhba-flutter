@@ -1,1 +1,846 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" href="images/favicon-64.png">
+    <link rel="apple-touch-icon" href="images/icon-192.png">
+    <title>تطبيق نخبة - Nokhba App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cairo:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cairo:wght@400;700&display=swap"></noscript>
+    <link rel="preload" as="image" href="images/splash.jpg" fetchpriority="high">
+    <style id="splashCss">
+        #splash { position: fixed; inset: 0; z-index: 99999; background: #e0e0dd; display: flex; align-items: center; justify-content: center; transition: opacity .45s ease, visibility .45s; }
+        #splash img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        @media (min-width: 700px) { #splash img { object-fit: contain; } }
+        #splash.out { opacity: 0; visibility: hidden; }
+    </style>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --title-color: #1e293b;
+            --border-color: #cbd5e1;
+            --task-bg: #f8fafc;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+        }
 
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #cbd5e1;
+            --title-color: #f8fafc;
+            --border-color: #334155;
+            --task-bg: #0f172a;
+            --primary-color: #3b82f6;
+            --primary-hover: #60a5fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Cairo', Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            margin: 0;
+            padding: 15px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: ""; position: fixed; inset: -20px; z-index: -1;
+            background: url('images/school-logo.jpg') center / cover no-repeat;
+            filter: blur(2px); opacity: .85; pointer-events: none;
+        }
+        .container {
+            background: rgba(255,255,255,.78);
+            width: 100%;
+            max-width: 900px;
+            background: color-mix(in srgb, var(--card-bg) 58%, transparent);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .top-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        h1, h2, h3 { text-align: center; color: var(--title-color); margin-top: 5px; }
+
+        .hidden { display: none !important; }
+
+        /* الشاشة الترحيبية */
+        .welcome-screen { text-align: center; padding: 10px 0; }
+        .welcome-title { font-size: 1.8rem; color: var(--primary-color); margin-bottom: 5px; }
+        .welcome-subtitle-en { font-size: 1.1rem; color: #64748b; margin-top: 0; margin-bottom: 15px; }
+        .school-name { font-size: 1.2rem; font-weight: bold; color: var(--title-color); margin-bottom: 20px; }
+
+        .main-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .menu-card {
+            background: var(--task-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .menu-card:hover { transform: translateY(-4px); border-color: var(--primary-color); }
+
+        /* أزرار اختيار الصف والشعبة */
+        .grade-select, .tab-select {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--task-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.85rem; }
+        th, td { border: 1px solid var(--border-color); padding: 8px 4px; text-align: center; }
+        th { background: var(--task-bg); color: var(--title-color); white-space: nowrap; }
+
+        /* منظم الدراسة */
+        .progress-container { background-color: var(--border-color); border-radius: 10px; overflow: hidden; height: 20px; margin: 15px 0 5px 0; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #3b82f6, #10b981); transition: width 0.4s ease; }
+        .progress-text { text-align: center; font-weight: bold; font-size: 0.85rem; margin-bottom: 15px; }
+
+        .motivation-card { display: none; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 15px; border-radius: 12px; margin: 15px 0; text-align: center; font-weight: bold; }
+        .weekly-badge { display: none; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input, select, button, textarea { padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); }
+        textarea { min-height: 140px; resize: vertical; user-select: text; -webkit-user-select: text; }
+        button { cursor: pointer; background: var(--primary-color); color: white; border: none; font-weight: bold; }
+
+        .task { background: var(--task-bg); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-right: 4px solid var(--primary-color); }
+        html[dir="ltr"] .task { border-right: none; border-left: 4px solid var(--primary-color); }
+        .task.done { opacity: 0.6; text-decoration: line-through; border-color: #10b981; }
+
+        .timer-display { font-size: 2.2rem; font-weight: bold; text-align: center; margin: 15px 0; color: var(--title-color); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .calendar-day { padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--task-bg); min-height: 45px; cursor: pointer; font-size: 0.85rem; }
+        .calendar-day.today { border-color: var(--primary-color); font-weight: bold; background: rgba(59, 130, 246, 0.15); }
+        .calendar-day.empty-day { border: none; background: transparent; }
+
+        .quiz-box { background: var(--task-bg); padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid var(--border-color); }
+        .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .quiz-option-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); text-align: right; }
+        html[dir="ltr"] .quiz-option-btn { text-align: left; }
+
+        /* لعبة الذاكرة */
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; }
+        .memory-card { min-height: 70px; padding: 4px; font-size: 0.8rem; background: var(--primary-color); color: #fff; border-radius: 10px; border: 2px solid var(--primary-color); }
+        .memory-card.flipped { background: var(--card-bg); color: var(--text-color); }
+        .memory-card.matched { background: #10b981; color: #fff; border-color: #10b981; }
+
+
+        /* ===== الصفحة الرئيسية الجديدة ===== */
+        .btnHome { display: none !important; }
+        body.dark-mode::before { opacity: .5; }
+        .acc { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; margin-top: 12px; text-align: right; overflow: hidden; }
+        .acc summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; font-family: 'Aref Ruqaa', serif; font-size: 1.35rem; color: var(--primary-color); }
+        .acc summary::-webkit-details-marker { display: none; }
+        .acc summary::after { content: "\25BE"; font-size: 1.3rem; transition: transform .3s; }
+        .acc[open] summary::after { transform: rotate(180deg); }
+        .acc-body { display: flex; gap: 12px; align-items: center; padding: 0 18px 16px; }
+        .acc-body p { margin: 0; line-height: 1.9; font-size: .95rem; }
+        .bubs { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 14px; }
+        .bub { width: 112px; text-align: center; cursor: pointer; animation: bubbleFloat 3.5s ease-in-out infinite; }
+        .bub:nth-child(2n) { animation-delay: .6s; } .bub:nth-child(3n) { animation-delay: 1.2s; }
+        .bub img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: #fff; border: 3px solid var(--primary-color); box-shadow: 0 6px 16px rgba(37,99,235,.35); }
+        .bub b { display: block; font-size: .85rem; margin-top: 6px; }
+        .bub small { display: block; font-size: .72rem; color: var(--primary-color); }
+        .home { text-align: center; }
+        .school-title { font-family: 'Aref Ruqaa', serif; font-weight: 700; font-size: clamp(1.5rem, 7vw, 2.6rem); line-height: 1.6; color: var(--primary-color); margin: 8px 0 18px; text-shadow: 0 2px 10px rgba(0,0,0,.18); }
+        .bcard { display: flex; align-items: center; gap: 14px; text-align: right; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 40px; padding: 14px 16px; margin-top: 16px; box-shadow: 0 8px 22px rgba(37,99,235,.18); animation: bubbleFloat 4s ease-in-out infinite; }
+        .bcard:nth-of-type(2) { animation-delay: .6s; }
+        .bcard:nth-of-type(3) { animation-delay: 1.2s; }
+        .bcard h3 { margin: 0 0 4px; color: var(--primary-color); font-family: 'Aref Ruqaa', serif; font-size: 1.4rem; }
+        .bcard p, .bcard ul { margin: 0; line-height: 1.9; font-size: .95rem; }
+        .bcard ul { padding-inline-start: 18px; }
+        .bimg { flex: 0 0 92px; width: 92px; height: 92px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); }
+        .bimg.star { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#f59e0b,#fbbf24); color: #fff; font-size: 2.6rem; border-color: #f59e0b; }
+        .gbox { position: relative; height: 210px; margin-top: 18px; border-radius: 40px; overflow: hidden; cursor: pointer; border: 3px solid var(--primary-color); box-shadow: 0 8px 22px rgba(37,99,235,.25); animation: bubbleFloat 4.5s ease-in-out infinite; }
+        .gbox img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s; }
+        .gbox img.on { opacity: 1; }
+        .gbox span { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px; background: rgba(0,0,0,.55); color: #fff; font-size: .9rem; }
+        .portals { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin: 28px 0 10px; }
+        .portal { position: relative; width: 138px; height: 138px; border-radius: 50%; overflow: hidden; cursor: pointer; display: flex; align-items: flex-end; justify-content: center; color: #fff; font-weight: 700; font-size: .95rem; background: linear-gradient(135deg,#2563eb,#7c3aed) center / cover; border: 4px solid #fff; box-shadow: 0 8px 20px rgba(37,99,235,.4); animation: bubbleFloat 3.2s ease-in-out infinite; }
+        .portal:nth-child(2) { animation-delay: .5s; background-image: linear-gradient(135deg,#0ea5e9,#2563eb); }
+        .portal:nth-child(3) { animation-delay: 1s; background-image: linear-gradient(135deg,#7c3aed,#db2777); align-items: center; }
+        .portal:active { transform: scale(.94); }
+        .portal span { width: 100%; padding: 8px 4px; background: rgba(0,0,0,.55); text-align: center; line-height: 1.3; }
+        .portal:nth-child(3) span { background: none; font-size: 1.05rem; }
+        .grid-menu { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 16px; }
+        .grid-menu .menu-card { width: 142px; height: 142px; border-radius: 50%; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,.28); animation: bubbleFloat 3.5s ease-in-out infinite; }
+        .grid-menu .menu-card:nth-child(2n) { animation-delay: .5s; } .grid-menu .menu-card:nth-child(3n) { animation-delay: 1s; }
+        .grid-menu .menu-card.hidden { display: none !important; }
+        .grid-menu .menu-card h3 { margin: 0; font-size: .85rem; line-height: 1.3; }
+        .grid-menu .card-char { width: 76px; height: 76px; margin-bottom: 4px; background: #fff; }
+        .card-char { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); margin-bottom: 8px; }
+        /* بطاقة المعلم */
+        .teachers-grid { grid-template-columns: 1fr !important; }
+        .tcard { background: var(--task-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 14px; }
+        .trow { display: flex; align-items: center; gap: 14px; }
+        .tphoto { flex: 0 0 96px; width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); background: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+        .tinfo { text-align: right; flex: 1; }
+        .tyears { font-size: .85rem; color: #64748b; margin-top: 2px; }
+        .tbio { margin-top: 12px; padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; line-height: 1.8; text-align: right; min-height: 48px; white-space: pre-wrap; }
+        .tbubbles { display: flex; gap: 10px; margin-top: 12px; }
+        .tb { flex: 1; border-radius: 999px !important; padding: 12px 6px !important; font-size: .85rem !important; animation: bubbleFloat 3.5s ease-in-out infinite; }
+        .tb:nth-child(2) { animation-delay: .7s; background: #7c3aed; }
+        .tpanel { margin-top: 12px; padding: 12px; background: var(--card-bg); border: 1px dashed var(--primary-color); border-radius: 16px; text-align: right; }
+        .tpanel h4 { margin: 0 0 8px; color: var(--primary-color); }
+        .tpanel input, .tpanel textarea { width: 100%; margin-bottom: 8px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        .chip { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border-color); background: var(--task-bg); font-size: .85rem; }
+        .chip.on { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+        .timgs { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+        .timg { position: relative; }
+        .timg img { width: 96px; height: 96px; object-fit: cover; border-radius: 12px; }
+        .timg b { position: absolute; top: 2px; left: 2px; background: #ef4444; color: #fff; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; font-size: .9rem; }
+        .tactions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .tactions button, .mini { padding: 5px 12px; font-size: .8rem; }
+        /* الصفحة الرئيسية والأدوار */
+        input, textarea { user-select: text; -webkit-user-select: text; }
+        .school-bubble { position: relative; width: 150px; height: 150px; margin: 20px auto; border-radius: 50%; overflow: hidden; border: 4px solid var(--primary-color); cursor: pointer; animation: bubbleFloat 3s ease-in-out infinite; box-shadow: 0 6px 16px rgba(37,99,235,0.35); }
+        .school-bubble img { width: 100%; height: 100%; object-fit: cover; }
+        .school-bubble span { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); color: #fff; font-size: 0.8rem; padding: 5px 0; }
+        @keyframes bubbleFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .role-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .role-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); overflow-y: auto; padding: 15px; z-index: 50; }
+        .modal-body { max-width: 700px; margin: 0 auto; }
+        .school-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        .school-gallery img { width: 100%; height: 260px; object-fit: cover; border-radius: 12px; }
+        .school-gallery img.logo-img { object-fit: contain; background: #fff; }
+        .sched-input { padding: 4px; font-size: 0.8rem; min-width: 55px; text-align: center; }
+        .ann-item { padding: 8px; margin-top: 6px; background: var(--card-bg); border-radius: 8px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+
+        /* المعلمين */
+        .teachers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 15px; }
+        .teacher-card { background: var(--task-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; text-align: center; }
+        .teacher-photo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); margin: 0 auto 8px; display: block; }
+        .teacher-photo.ph { display: flex; align-items: center; justify-content: center; background: var(--primary-color); color: #fff; font-size: 2rem; font-weight: bold; }
+        .teacher-name { font-weight: bold; color: var(--title-color); }
+        .teacher-spec { font-size: 0.85rem; color: var(--primary-color); margin: 4px 0; }
+        .teacher-bio { font-size: 0.85rem; opacity: 0.85; white-space: pre-wrap; }
+
+        .info-box { text-align: right; margin-top: 12px; }
+        .info-box h3 { margin: 0 0 6px; text-align: right; color: var(--primary-color); }
+        .info-box p { margin: 0; line-height: 1.8; }
+        .achv-list { margin: 0; padding-inline-start: 20px; line-height: 1.8; }
+        .muted { opacity: .7; }
+        .role-buttons { margin-top: 20px; }
+        .nav-back-btn { background: #64748b; margin-bottom: 15px; display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; font-size: 0.9rem; }
+
+        /* ===== صفحة رئيسية واحدة بدون تمرير ===== */
+        #homeScreen:not(.hidden) { display: flex; flex-direction: column; height: calc(100dvh - 125px); min-height: 520px; overflow: hidden; }
+        #homeScreen .school-title { font-size: clamp(1.15rem, 5.2vw, 1.9rem); margin: 0 0 8px; line-height: 1.5; flex: 0 0 auto; }
+        #homeScreen .gbox { flex: 1 1 0; min-height: 110px; max-height: 210px; height: auto; margin-top: 0; border-radius: 28px; animation: none; }
+        #homeScreen .ann-board { flex: 0 0 auto; margin-top: 8px; padding: 8px 12px; border-radius: 24px; max-height: 22%; overflow-y: auto; }
+        #homeScreen .ann-board h3 { margin: 0 0 4px; font-size: .95rem; }
+        #homeScreen .ann-item { padding: 5px 8px; margin-top: 4px; font-size: .85rem; }
+        #homeScreen .portals { flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; justify-items: center; margin: 10px 0 0; }
+        #homeScreen .portal { width: min(26vw, 104px); height: min(26vw, 104px); border-width: 3px; align-items: flex-end; animation-duration: 3.4s; }
+        #homeScreen .portal span, #homeScreen .portal:nth-child(3) span { background: rgba(0,0,0,.6); font-size: .78rem; padding: 5px 2px; }
+
+        /* ===== مهام كبيرة / طمأنينة / جداول ===== */
+        .mode-off { display: none !important; }
+        .tpanel .timgs.view { display: block; }
+        .tpanel .timgs.view .timg { width: 100%; margin-bottom: 12px; }
+        .tpanel .timgs.view .timg img { width: 100%; height: auto; max-height: none; object-fit: contain; border-radius: 12px; cursor: zoom-in; background: #fff; }
+        #viewerImg.zoomed { width: 260%; max-width: none; }
+        .tam-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .tam-mood { border: none; border-radius: 22px; padding: 16px 8px; color: #fff; font-size: 1.05rem; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .tam-mood i { font-style: normal; font-size: 2rem; line-height: 1; }
+        .tam-badge { width: 84px; height: 84px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2.4rem; }
+        .tam-actions { display: flex; flex-direction: column; gap: 8px; }
+        .breath-circle { width: 120px; height: 120px; border-radius: 50%; margin: 10px auto; background: radial-gradient(circle, #5eead4, #0d9488); transition: transform 4s ease-in-out; transform: scale(.6); }
+        .tam-bar { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: .85rem; }
+        .tam-bar > span:first-child { width: 64px; text-align: right; }
+        .tam-bar .track { flex: 1; background: var(--task-bg); border-radius: 999px; height: 14px; overflow: hidden; }
+        .tam-bar .fill { height: 100%; border-radius: 999px; }
+        .tam-stat { display: flex; gap: 8px; margin-bottom: 8px; }
+        .tam-stat div { flex: 1; text-align: center; padding: 10px 4px; border-radius: 16px; background: var(--task-bg); font-size: .85rem; }
+        .tam-stat b { display: block; font-size: 1.4rem; color: var(--primary-color); }
+        .tick { border: 1px solid var(--border-color); border-radius: 16px; padding: 10px; margin-bottom: 10px; text-align: right; }
+        .tick small { color: #64748b; }
+        .tick select, .tick textarea { width: 100%; margin-top: 6px; }
+        .gitem { position: relative; }
+        .gitem b { position: absolute; top: 6px; left: 6px; background: #ef4444; color: #fff; width: 26px; height: 26px; border-radius: 50%; text-align: center; line-height: 26px; cursor: pointer; }
+        .exam-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px; margin-bottom: 8px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--border-color); }
+        .exam-row .d { color: var(--primary-color); font-weight: bold; font-size: .9rem; }
+        .exam-row.past { opacity: .5; }
+        @media print {
+            body > *:not(#posterModal) { display: none !important; }
+            #posterModal { position: static !important; background: #fff !important; padding: 0 !important; overflow: visible !important; }
+            #posterModal .nav-back-btn, #btnPrintPoster { display: none !important; }
+        }
+        .timg a.dl { display: inline-block; margin-top: 4px; padding: 5px 12px; border-radius: 10px; background: var(--primary-color); color: #fff; text-decoration: none; font-size: .8rem; }
+        .gbox img.port { object-fit: contain; background: #0f172a; }
+        .loan { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px; margin-top: 8px; border-radius: 14px; border: 1px solid var(--border-color); background: var(--card-bg); text-align: right; }
+        .loan b { display: block; }
+        .loan small { color: #64748b; display: block; }
+        .loan.late { border-color: #ef4444; background: rgba(239,68,68,.08); }
+        .loan.late .due { color: #ef4444; font-weight: bold; }
+        .loan .due { color: var(--primary-color); font-size: .85rem; }
+        .loan .lb { display: flex; flex-direction: column; gap: 4px; }
+        .privacy-link { display: block; margin-top: auto; text-align: center; font-size: .75rem; color: #64748b; padding: 6px 0 0; text-decoration: underline; }
+        .task { border: 1px solid var(--border-color); border-radius: 14px; padding: 10px; margin-top: 10px; text-align: right; }
+        .task .tbio { margin: 6px 0; }
+        body.modal-open #floatBack { display: none !important; }
+        /* سهم الرجوع العائم: أعلى اليسار، يظهر عند التمرير بعد زر الرجوع داخل الصفحة */
+        #floatBack { position: fixed; left: 12px; right: auto; bottom: auto; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 60; width: 48px; height: 48px; border-radius: 50%; padding: 0; border: 2px solid rgba(255,255,255,.75); color: #fff; background: linear-gradient(135deg, #2563eb, #0ea5e9); box-shadow: 0 6px 18px rgba(37,99,235,.4); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity .22s ease, transform .22s ease; }
+        #floatBack:active { transform: scale(.92); }
+        body.back-inpage #floatBack { opacity: 0; pointer-events: none; transform: translateY(-14px) scale(.9); }
+        .nav-back-btn.page-back { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 12px; padding: 8px 18px 8px 12px; border-radius: 999px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--primary-color); font-weight: 700; font-size: .95rem; cursor: pointer; }
+        .nav-back-btn.page-back svg { width: 22px; height: 22px; }
+        #mtList .task h4 { margin: 0 0 4px; }
+        .cls-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--border-color); }
+        .cls-row .chips { margin: 0; }
+    </style>
+</head>
+<body>
+<div id="splash" aria-hidden="true"><img src="images/splash.jpg" alt="" decoding="async" fetchpriority="high"></div>
+
+<button id="floatBack" class="hidden" aria-label="رجوع"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M4.5 12H19M13.2 5.6C14.6 8.8 16.6 10.8 19.6 12c-3 1.2-5 3.2-6.4 6.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<div class="container">
+    <div class="top-bar">
+        <button id="btnToggleTheme" class="top-btn"><span id="themeBtnText">الوضع الداكن</span></button>
+    </div>
+
+    <!-- الصفحة الرئيسية -->
+    <div id="homeScreen" class="home hidden">
+        <h1 class="school-title">مدرسة الملك عبد الله الثاني للتميز – الطفيلة</h1>
+
+        <div id="galleryBox" class="gbox">
+            <img decoding="async" fetchpriority="high" class="on" src="images/t/h01.jpg" alt=""><img decoding="async" data-src="images/t/h02.jpg" alt=""><img decoding="async" data-src="images/t/h03.jpg" alt=""><img decoding="async" data-src="images/t/h04.jpg" alt=""><img decoding="async" class="port" data-src="images/t/h05.jpg" alt=""><img decoding="async" data-src="images/t/h06.jpg" alt=""><img decoding="async" class="port" data-src="images/t/h07.jpg" alt=""><img decoding="async" data-src="images/t/h08.jpg" alt=""><img decoding="async" data-src="images/t/h09.jpg" alt=""><img decoding="async" data-src="images/t/h10.jpg" alt=""><img decoding="async" data-src="images/t/h11.jpg" alt=""><img decoding="async" data-src="images/t/h12.jpg" alt=""><img decoding="async" data-src="images/t/h13.jpg" alt=""><img decoding="async" data-src="images/t/h14.jpg" alt=""><img decoding="async" data-src="images/t/h15.jpg" alt=""><img decoding="async" data-src="images/t/h16.jpg" alt=""><img decoding="async" data-src="images/t/h17.jpg" alt=""><img decoding="async" data-src="images/t/h18.jpg" alt=""><img decoding="async" data-src="images/t/h19.jpg" alt=""><img decoding="async" data-src="images/t/h20.jpg" alt="">
+            <span>صور المدرسة — اضغط لعرض الكل</span>
+        </div>
+
+        <div class="quiz-box info-box ann-board">
+            <h3>لوحة الإعلانات</h3>
+            <div id="homeAnnouncements"><p class="muted">لا توجد إعلانات حالياً</p></div>
+        </div>
+
+        <div class="portals">
+            <div class="portal info-btn" data-info="vision" style="background-image:url('images/vision.jpg')"><span>الرؤية</span></div>
+            <div class="portal info-btn" data-info="mission" style="background-image:url('images/mission.jpg')"><span>الرسالة</span></div>
+            <div class="portal role-btn" data-role="admin" style="background-image:url('images/office.svg'); background-color:#f1f5f9; background-size:cover; background-position:center;"><span>الإدارة</span></div>
+            <div class="portal role-btn" data-role="staff" style="background-image:url('images/teacher-char.jpg'); background-size:cover; background-position:center top;"><span>المعلمون</span></div>
+            <div class="portal role-btn" data-role="student" style="background-image:url('images/student-char.jpg')"><span>الطالب</span></div>
+            <div class="portal" id="bubFeedback" style="background-image:url('images/icon-feedback.svg'); background-size:cover;"><span>رأيك</span></div>
+        </div>
+        <a class="privacy-link" href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>
+    </div>
+
+    <!-- تسجيل الدخول -->
+    <div id="loginSection" class="hidden">
+        <h2 id="loginTitle">تسجيل الدخول</h2>
+        <div class="form-group">
+            <input type="text" id="loginUser" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="none">
+            <input type="password" id="loginPass" placeholder="كلمة السر" autocomplete="current-password">
+            <button id="btnLogin">دخول</button>
+            <p id="loginMsg" style="text-align:center; color:#ef4444; margin:0;"></p>
+        </div>
+    </div>
+
+    <!-- 2. القائمة الرئيسية -->
+    <div id="mainMenu" class="hidden">
+        <div class="role-bar">
+            <span id="roleLabel">طالب</span>
+            <button id="btnLogout" class="top-btn">خروج</button>
+        </div>
+        <h1>تطبيق نخبة</h1>
+        <p id="menuHint" style="text-align: center; color: #64748b;">اختر القسم للبدء</p>
+
+        <div class="grid-menu">
+            <div class="menu-card" id="cardSchedule" data-roles="student teacher staff admin">
+                <img loading="lazy" decoding="async" class="card-char" src="images/char-schedule.svg" alt="">
+                <h3 id="cardScheduleTitle">الجداول</h3>
+            </div>
+            <div class="menu-card" id="cardMyTasks" data-roles="student">
+                <img loading="lazy" decoding="async" class="card-char" src="images/icon-mytasks.svg" alt="">
+                <h3>مهماتي</h3>
+            </div>
+            <div class="menu-card" id="cardOrganizer" data-roles="student">
+                <img loading="lazy" decoding="async" class="card-char" src="images/char-organizer.svg" alt="">
+                <h3 id="cardOrganizerTitle">منظم الدراسة</h3>
+            </div>
+            <div class="menu-card" id="cardWhatWeKnow" data-roles="student">
+                <img loading="lazy" decoding="async" class="card-char" src="images/char-fun.svg" alt="">
+                <h3 id="cardWhatWeKnowTitle">ماذا نعرف</h3>
+            </div>
+            <div class="menu-card" id="cardTam" data-roles="student">
+                <img loading="lazy" decoding="async" class="card-char" src="images/icon-tam.svg" alt="">
+                <h3>طمأنينة</h3>
+            </div>
+            <div class="menu-card" id="cardMyCard" data-roles="teacher staff">
+                <img loading="lazy" decoding="async" class="card-char" src="images/teacher-char.jpg" alt="">
+                <h3>بطاقتي</h3>
+            </div>
+            <div class="menu-card" id="cardTeachers" data-roles="student admin">
+                <img loading="lazy" decoding="async" class="card-char" src="images/teacher-char.jpg" alt="">
+                <h3 id="cardTeachersTitle">المعلمون والمعلمات</h3>
+            </div>
+            <div class="menu-card" id="cardPassword" data-roles="teacher staff admin">
+                <img loading="lazy" decoding="async" class="card-char" src="images/char-password.svg" alt="">
+                <h3>تغيير كلمة السر</h3>
+            </div>
+        </div>
+
+        <div class="quiz-box admin-only hidden">
+            <h3 style="margin-top:0;">إدارة الإعلانات</h3>
+            <div class="form-group" style="margin-bottom:0;">
+                <textarea id="announceText" placeholder="اكتب الإعلان هنا..."></textarea>
+                <button id="btnAddAnnounce">نشر الإعلان</button>
+            </div>
+            <div id="announcementsList"></div>
+        </div>
+    </div>
+
+    <!-- 3. قسم الجدول المدرسي الشامل (7 - 12) -->
+    <div id="scheduleSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+        <h2 id="scheduleHeading">الجداول</h2>
+        <div class="tab-select" id="schedModeTabs">
+            <button class="tab-btn mode-btn active" data-m="study">الجدول الدراسي</button>
+            <button class="tab-btn mode-btn" data-m="exam">جدول الامتحانات</button>
+        </div>
+        <div class="admin-only study-only hidden" style="display:flex; gap:8px; justify-content:center; margin-bottom:10px;">
+            <button id="btnEditSchedule">تعديل الجدول</button>
+            <button id="btnSaveSchedule" class="hidden" style="background:#10b981;">حفظ للجميع</button>
+        </div>
+
+        <!-- اختيار الصف -->
+        <div class="grade-select">
+            <button class="tab-btn grade-btn active" onclick="switchGrade('g7')">الصف السابع</button>
+            <button class="tab-btn grade-btn" onclick="switchGrade('g8')">الصف الثامن</button>
+            <button class="tab-btn grade-btn" onclick="switchGrade('g9')">الصف التاسع</button>
+            <button class="tab-btn grade-btn" onclick="switchGrade('g10')">الصف العاشر</button>
+            <button class="tab-btn grade-btn" onclick="switchGrade('g11')">الصف 11</button>
+            <button class="tab-btn grade-btn" onclick="switchGrade('g12')">الصف 12</button>
+        </div>
+
+        <!-- اختيار الشعبة -->
+        <div class="tab-select study-only">
+            <button class="tab-btn section-btn active" onclick="switchSection('a')">الشعبة (أ)</button>
+            <button class="tab-btn section-btn" onclick="switchSection('b')">الشعبة (ب)</button>
+            <button class="tab-btn section-btn" onclick="switchSection('c')">الشعبة (ج)</button>
+        </div>
+
+        <div class="table-responsive study-only">
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th>اليوم</th>
+                        <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                    <!-- يتم تعبئة الحصص تلقائياً عبر JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="examPanel" class="hidden">
+            <div class="quiz-box admin-only hidden">
+                <h3 style="margin-top:0;">إضافة امتحان (للصف المحدد أعلاه)</h3>
+                <input type="date" id="examDate" style="width:100%;margin-bottom:8px;">
+                <input type="text" id="examSubject" maxlength="60" placeholder="اسم مادة الامتحان" style="width:100%;margin-bottom:8px;">
+                <button id="btnAddExam" style="width:100%;">إضافة للجدول</button>
+            </div>
+            <div id="examList"></div>
+        </div>
+    </div>
+
+    <!-- لوحة جدول الامتحانات داخل قسم الجداول تُضاف عبر JS -->
+    <!-- 4. قسم منظم الدراسة -->
+    <div id="organizerSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+
+        <h1 id="appTitle">منظم وقت الدراسة</h1>
+
+        <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
+        <div id="progressText" class="progress-text">التقدم: 0%</div>
+
+        <div id="weeklyBadge" class="weekly-badge">
+            <span id="badgeTitle">وسام التميز الأسبوعي:</span> <span id="badgeText">مبتدئ مواظب</span>
+        </div>
+
+        <div id="motivationBox" class="motivation-card">
+            <div id="motivationText">واصل إنجاز مهامك!</div>
+        </div>
+
+        <div class="form-group">
+            <input type="text" id="taskName" placeholder="اسم المهمة الدراسية...">
+            <select id="taskType">
+                <option value="قراءة">قراءة</option>
+                <option value="حفظ">حفظ</option>
+                <option value="حل واجبات">حل واجبات</option>
+                <option value="مراجعة">مراجعة</option>
+            </select>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="taskHours" value="0" min="0" placeholder="ساعات" style="width: 50%;">
+                <input type="number" id="taskMinutes" value="0" min="0" max="59" placeholder="دقائق" style="width: 50%;">
+            </div>
+            <button id="btnAddTask">إضافة المهمة</button>
+        </div>
+
+        <h2 id="tasksHeading">قائمة المهام اليومية</h2>
+        <div id="tasks"></div>
+
+        <h2 id="timerHeading">المؤقت الدراسـي</h2>
+        <div id="timer" class="timer-display">00:00:00</div>
+        <div style="display: flex; gap: 5px; justify-content: center; margin-bottom: 25px;">
+            <button id="btnPauseTimer">إيقاف مؤقت</button>
+            <button id="btnResumeTimer">استئناف</button>
+            <button id="btnResetTimer" style="background: #ef4444;">إعادة ضبط</button>
+        </div>
+
+        <h2 id="calendarHeading">الروزنامة والمواعيد</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0;">
+            <button id="btnPrevMonth">سابق</button>
+            <h3 id="monthTitle" style="margin:0;"></h3>
+            <button id="btnNextMonth">لاحق</button>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+
+        <div id="dateTaskForm" style="margin-top: 15px;">
+            <h3 id="selectedDateText">اختر يوماً من الروزنامة</h3>
+            <div class="form-group">
+                <input type="text" id="calendarTaskName" placeholder="عنوان الموعد أو الاختبار...">
+                <input type="time" id="calendarTaskTime">
+                <input type="text" id="calendarTaskNote" placeholder="ملاحظة إضافية...">
+                <button id="btnAddCalendarTask">إضافة للروزنامة</button>
+            </div>
+            <div id="calendarTaskList"></div>
+        </div>
+    </div>
+
+    <!-- 5. قسم ماذا نعرف -->
+    <div id="whatWeKnowSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+        <h2 id="wwkTitle">قسم ماذا نعرف</h2>
+
+        <div class="grid-menu">
+            <div class="menu-card" id="cardSpeedQuiz">
+                <h3 id="cardSpeedQuizTitle">اسئلة سرعة</h3>
+            </div>
+            <div class="menu-card" id="cardFun">
+                <h3 id="cardFunTitle">ترفيه</h3>
+            </div>
+        </div>
+
+        <div id="funSub" class="hidden" style="margin-top:20px;">
+            <h3>لعبة الذاكرة</h3>
+            <p style="text-align:center;">اقلب بطاقتين وطابق كل شيء مع ما يناسبه، وتعلّم معلومة جديدة مع كل زوج!</p>
+            <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                <div>المحاولات: <span id="memoryMoves">0</span></div>
+                <div>الأزواج: <span id="memoryPairs">0</span>/8</div>
+            </div>
+            <div id="memoryGrid" class="memory-grid"></div>
+            <div id="memoryFact" class="quiz-box hidden" style="text-align:center;"></div>
+            <button id="btnRestartMemory" class="main-btn">لعبة جديدة</button>
+        </div>
+
+        <div id="speedQuizSub" class="hidden" style="margin-top:20px;">
+            <h3>تحدي أسئلة السرعة (30 ثانية)</h3>
+            
+            <div id="quizStartArea" style="text-align: center;">
+                <p>لديك 30 ثانية للإجابة على أكبر عدد ممكن من الأسئلة العامة!</p>
+                <button id="btnStartQuiz" class="main-btn">ابدأ التحدي الان</button>
+            </div>
+
+            <div id="quizActiveArea" class="hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
+                    <div>الوقت المتبقي: <span id="quizTimerText" style="color:#ef4444; font-size:1.2rem;">30</span> ثانية</div>
+                    <div>النتيجة: <span id="quizScoreText" style="color:#10b981; font-size:1.2rem;">0</span></div>
+                </div>
+
+                <div class="quiz-box">
+                    <h4 id="quizQuestionText" style="margin-top:0;"></h4>
+                    <div id="quizOptionsContainer" class="quiz-options"></div>
+                </div>
+            </div>
+
+            <div id="quizResultArea" class="hidden" style="text-align: center;">
+                <h3>انتهى الوقت!</h3>
+                <p>أجبت على <strong id="finalScore" style="color:var(--primary-color);">0</strong> أسئلة بشكل صحيح!</p>
+                <button id="btnRestartQuiz" class="main-btn">إعادة التحدي</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم المعلمين -->
+    <div id="teachersSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+        <h2 id="teachersHeading">المعلمون والمعلمات</h2>
+        <div id="staffTabs" class="tab-select"></div>
+
+        <div class="quiz-box admin-only hidden">
+            <h3 style="margin-top:0;">إضافة وحذف الكادر (الإدارة)</h3>
+            <div class="form-group" style="margin-bottom:0;">
+                <select id="tCategory">
+                    <option value="tm">معلم</option>
+                    <option value="tf">معلمة</option>
+                    <option value="assistant">مساعد المدير</option>
+                                        <option value="diwan">ديوان</option>
+                    <option value="counselor">مرشد</option>
+                    <option value="librarian">أمين مكتبة</option>
+                    <option value="accountant">محاسب</option>
+                    <option value="nurse">ممرضة</option>
+                </select>
+                <input type="text" id="tName" placeholder="الاسم">
+                <input type="text" id="tSpecialty" placeholder="التخصص">
+                <input type="number" id="tYears" placeholder="سنوات الخبرة (اختياري)" min="0" max="60" inputmode="numeric">
+                <input type="text" id="tUsername" placeholder="اسم المستخدم بالإنجليزي (لإنشاء حساب دخول)" autocapitalize="none">
+                <input type="text" id="tPassword" placeholder="كلمة السر (8+ أحرف: كبير وصغير ورقم ورمز)" autocomplete="off" autocapitalize="none">
+                <input type="file" id="tPhoto" accept="image/*">
+                <button id="btnAddTeacher">إضافة</button>
+            </div>
+        </div>
+
+        <div id="teachersList" class="teachers-grid"></div>
+    </div>
+
+    <!-- 6. قسم رأيك -->
+    <div id="passwordSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+        <h2>تغيير كلمة السر</h2>
+        <div class="form-group">
+            <input type="password" id="pwOld" placeholder="كلمة السر الحالية" autocomplete="current-password">
+            <input type="password" id="pwNew" placeholder="الجديدة (8+ أحرف: كبير وصغير ورقم ورمز)" autocomplete="new-password">
+            <input type="password" id="pwNew2" placeholder="أعد كتابة كلمة السر الجديدة" autocomplete="new-password">
+            <button id="btnChangePassword">حفظ كلمة السر</button>
+            <p id="pwMsg" style="text-align:center; margin:8px 0 0;"></p>
+        </div>
+    </div>
+
+    <div id="feedbackSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+        <h2 id="feedbackHeading">شاركنا رأيك</h2>
+        <div class="form-group">
+            <textarea id="feedbackText" placeholder="اكتب رأيك أو اقتراحك هنا..."></textarea>
+            <button id="btnSendFeedback">إرسال</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- صور المدرسة (تفتح من الفقاعة) -->
+<div id="teacherModal" class="modal hidden">
+    <div class="modal-body">
+        <button id="btnCloseTeacher" class="nav-back-btn">إغلاق</button>
+        <div id="teacherModalBody"></div>
+    </div>
+</div>
+
+<div id="infoModal" class="modal hidden">
+    <div class="modal-body">
+        <button id="btnCloseInfo" class="nav-back-btn">إغلاق</button>
+        <div class="quiz-box" style="text-align:center;">
+            <h2 id="infoTitle" style="font-family:'Aref Ruqaa',serif;color:var(--primary-color);margin-top:0;"></h2>
+            <img id="infoImg" class="bimg" style="width:140px;height:140px;margin:0 auto 12px;display:block;" src="" alt="">
+            <p id="infoText" style="line-height:2;margin:0;"></p>
+        </div>
+    </div>
+</div>
+
+
+    <!-- مهماتي: مهام المعلمين حسب الصف والشعبة -->
+    <div id="myTasksSection" class="hidden">
+        <h2 style="text-align:center;color:var(--primary-color);">مهماتي</h2>
+        <p class="muted" style="text-align:center;">اختر صفك وشعبتك لتظهر لك المهام والاختبارات التي حددها المعلمون</p>
+        <div class="tab-select" id="mtGrades"></div>
+        <div class="tab-select" id="mtSections"></div>
+        <div id="mtList"></div>
+    </div>
+
+    <!-- طمأنينة: واجهة الطالب (مجهولة) -->
+    <div id="tamSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+        <h2 style="text-align:center;color:var(--primary-color);">طمأنينة</h2>
+
+        <div id="tamStep1">
+            <p class="muted" style="text-align:center;">كيف تشعر الآن؟ إجابتك مجهولة ولا يُطلب منك اسم.</p>
+            <div id="tamMoods" class="tam-grid"></div>
+        </div>
+
+        <div id="tamStep2" class="hidden">
+            <p style="text-align:center;font-weight:bold;">ما سبب هذا الشعور؟ <span class="muted">(اختياري)</span></p>
+            <div id="tamReasons" class="chips" style="justify-content:center;"></div>
+        </div>
+
+        <div id="tamStep3" class="hidden">
+            <div class="quiz-box" style="text-align:center;">
+                <div id="tamBadge" class="tam-badge"></div>
+                <p id="tamMsg" style="line-height:2;margin:10px 0;"></p>
+                <div class="tam-actions">
+                    <button id="btnBreath">تمرين تنفس مهدئ</button>
+                    <button id="btnHelp" style="background:#ef4444;">أحتاج مساعدة سرية</button>
+                    <button id="btnTamAgain" style="background:#64748b;">رجوع</button>
+                </div>
+            </div>
+            <div id="breathBox" class="quiz-box hidden" style="text-align:center;">
+                <div id="breathCircle" class="breath-circle"></div>
+                <p id="breathText" style="font-size:1.2rem;font-weight:bold;"></p>
+                <button id="btnBreathStop" class="mini" style="background:#64748b;">إيقاف</button>
+            </div>
+            <div id="helpBox" class="quiz-box hidden">
+                <h3 style="margin-top:0;">رسالة سرية للمرشد</h3>
+                <textarea id="helpMsg" maxlength="1000" placeholder="اكتب ما تريد قوله للمرشد النفسي..." style="width:100%;margin-bottom:8px;"></textarea>
+                <input type="text" id="helpContact" maxlength="120" placeholder="وسيلة تواصل (اختياري) — اتركها فارغة لتبقى مجهولاً" style="width:100%;margin-bottom:8px;">
+                <button id="btnSendHelp" style="width:100%;">إرسال</button>
+                <p id="helpDone" class="muted" style="text-align:center;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- طمأنينة: لوحة المرشد -->
+    <div id="tamDashSection" class="hidden">
+        <button class="nav-back-btn btnHome"><span class="homeBtnText">الرئيسية</span></button>
+        <h2 style="text-align:center;color:var(--primary-color);">لوحة طمأنينة</h2>
+        <div class="tab-select" id="tamPeriods">
+            <button class="tab-btn tam-p active" data-d="1">آخر 24 ساعة</button>
+            <button class="tab-btn tam-p" data-d="7">7 أيام</button>
+            <button class="tab-btn tam-p" data-d="30">30 يوماً</button>
+        </div>
+        <div class="quiz-box">
+            <h3 style="margin-top:0;">نبض المدرسة</h3>
+            <div id="tamPulse"></div>
+            <div id="tamBars"></div>
+        </div>
+        <div class="quiz-box">
+            <h3 style="margin-top:0;">طلبات الدعم السرية</h3>
+            <div id="tamTickets"></div>
+        </div>
+        <div class="quiz-box" style="text-align:center;">
+            <button id="btnTamQr">ملصق رمز QR للطلاب</button>
+            <button id="btnTamPurge" style="background:#ef4444;">حذف البيانات الأقدم من 90 يوماً</button>
+        </div>
+    </div>
+
+<div id="galleryModal" class="modal hidden">
+    <div class="modal-body">
+        <button id="btnCloseGallery" class="nav-back-btn">إغلاق</button>
+        <div class="quiz-box admin-only hidden" style="margin-top:8px;">
+            <h3 style="margin-top:0;">إضافة صور للمدرسة (المدير)</h3>
+            <input type="file" id="galFile" accept="image/*" multiple style="width:100%;margin-bottom:6px;">
+            <p id="galMsg" class="muted" style="margin:0;"></p>
+        </div>
+        <div id="galleryDbList" class="school-gallery"></div>
+        <div class="school-gallery">
+            <img loading="lazy" decoding="async" src="images/h01.jpg" alt=""><img loading="lazy" decoding="async" src="images/h02.jpg" alt=""><img loading="lazy" decoding="async" src="images/h03.jpg" alt=""><img loading="lazy" decoding="async" src="images/h04.jpg" alt=""><img loading="lazy" decoding="async" src="images/h05.jpg" alt=""><img loading="lazy" decoding="async" src="images/h06.jpg" alt=""><img loading="lazy" decoding="async" src="images/h07.jpg" alt=""><img loading="lazy" decoding="async" src="images/h08.jpg" alt=""><img loading="lazy" decoding="async" src="images/h09.jpg" alt=""><img loading="lazy" decoding="async" src="images/h10.jpg" alt=""><img loading="lazy" decoding="async" src="images/h11.jpg" alt=""><img loading="lazy" decoding="async" src="images/h12.jpg" alt=""><img loading="lazy" decoding="async" src="images/h13.jpg" alt=""><img loading="lazy" decoding="async" src="images/h14.jpg" alt=""><img loading="lazy" decoding="async" src="images/h15.jpg" alt=""><img loading="lazy" decoding="async" src="images/h16.jpg" alt=""><img loading="lazy" decoding="async" src="images/h17.jpg" alt=""><img loading="lazy" decoding="async" src="images/h18.jpg" alt=""><img loading="lazy" decoding="async" src="images/h19.jpg" alt=""><img loading="lazy" decoding="async" src="images/h20.jpg" alt="">
+        </div>
+    </div>
+</div>
+
+<div id="imgViewer" class="modal hidden" style="background:rgba(0,0,0,.96);padding:8px;z-index:90;">
+    <button id="btnCloseViewer" class="nav-back-btn">إغلاق</button> <a id="btnDownloadImg" class="nav-back-btn" download="nokhba-image.jpg" style="background:#2563eb;color:#fff;text-decoration:none;">تحميل الصورة</a>
+    <p style="color:#fff;text-align:center;margin:4px 0;font-size:.85rem;">اضغط على الصورة للتكبير أو التصغير</p>
+    <div id="viewerWrap" style="overflow:auto;"><img id="viewerImg" alt="" style="width:100%;height:auto;display:block;"></div>
+</div>
+
+<div id="posterModal" class="modal hidden" style="z-index:80;">
+    <div class="modal-body">
+        <button id="btnClosePoster" class="nav-back-btn">إغلاق</button>
+        <div id="posterPage" class="quiz-box" style="text-align:center;background:#fff;color:#0f172a;">
+            <img src="images/school-logo.jpg" alt="" style="width:90px;height:90px;border-radius:50%;object-fit:cover;">
+            <h2 style="color:#0d9488;margin:8px 0;">طمأنينة</h2>
+            <p style="font-size:1.1rem;margin:0 0 10px;">كيف تشعر اليوم؟ امسح الرمز وأخبرنا — بسرية تامة وبدون اسم</p>
+            <div id="posterQr" style="display:inline-block;padding:10px;background:#fff;"></div>
+            <p style="margin:10px 0 0;font-size:.85rem;">مدرسة الملك عبد الله الثاني للتميز – الطفيلة</p>
+        </div>
+        <div style="text-align:center;"><button id="btnPrintPoster">طباعة</button></div>
+    </div>
+</div>
+
+<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="window.__sbLoaded=1;if(window.__onSupabase)window.__onSupabase();"></script>
+<script defer src="supabase-config.js"></script>
+<script defer src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {})); }
+</script>
+<script>
+(function () {
+  var s = document.getElementById("splash"); if (!s) return;
+  var t0 = Date.now(), MIN = 1300, MAX = 4500, done = false;
+  function hide() { if (done) return; done = true; s.classList.add("out"); setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 600); }
+  function ready() { setTimeout(hide, Math.max(0, MIN - (Date.now() - t0))); }
+  document.addEventListener("app-ready", ready);
+  setTimeout(hide, MAX);
+  s.addEventListener("click", hide);
+})();
+</script>
+</body>
+</html>
